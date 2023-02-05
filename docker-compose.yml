@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5431:5432"   # 5431 - port локальной машины, 5432 - port postgres
+    environment:
+      POSTGRES_USER: nikolay
+      POSTGRES_PASSWORD: 310585 
+      POSTGRES_DB: aiohttp_lecture 
+
+
+# Запуск: docker-compose up
