@@ -88,7 +88,7 @@ def test_patch_advertisement(create_advertisement):
     assert title == "updated_advertisement"
 
 
-# удаление объявления
+# # удаление объявления
 def test_delete_advertisement(create_advertisement):
     advertisement_id = create_advertisement[
         "id"

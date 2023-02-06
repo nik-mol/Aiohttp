@@ -1,7 +1,7 @@
 DB_USER = "nikolay"
 DB_PASSWORD = "310585"
 DB_HOST = "127.0.0.1"
-DB_PORT = "5432"
+DB_PORT = "5431"
 DB_BASE = "aiohttp_lecture"
 
 

@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from db import Session, engine
 from models import AdvertisementModel, Base
+from schema import validate, CreateAdvertisementSchema, PutchAdvertisementSchema
 
 app = web.Application()  # создание класса "Application"
 
@@ -42,9 +43,8 @@ class Advertisement(web.View):
             )
 
     async def post(self):
-        advertisement_data = (
-            await self.request.json()
-        )  # получаем json-данные по объявлению
+        advertisement_data = validate(await self.request.json(), CreateAdvertisementSchema)
+          # получаем json-данные по объявлению
         async with Session() as session:  # открывает БД
             new_advertisement = AdvertisementModel(
                 **advertisement_data
@@ -55,7 +55,7 @@ class Advertisement(web.View):
             except IntegrityError as er:  # проверка на уникальность
                 raise web.HTTPConflict(  # HTTPNotFound - встроенная ошибка (может отправлять только 'text')
                     text=json.dumps(
-                        {"status": "error", "description": " olready exists"}
+                        {"status": "error", "description": "Advertisement olready exists"}
                     ),
                     content_type="application/json",  # необходимо прописать, что мы отправляем именно 'JSON'
                 )
@@ -70,8 +70,8 @@ class Advertisement(web.View):
         advertisement_id = int(
             self.request.match_info["advertisement_id"]
         )  # match_info - перебрасывает динамику в 'add_routes'
-        advertisement_data = (
-            await self.request.json()
+        advertisement_data = validate(
+            await self.request.json(), PutchAdvertisementSchema
         )  # получаем json-данные объявления
         async with Session() as session:  # открывает БД
             advertisement = await get_advertisement(
@@ -85,8 +85,7 @@ class Advertisement(web.View):
                 await session.commit()
             return web.json_response(
                 {
-                    "status": "advertisement successfully updated",
-                    "title": advertisement.title,
+                    "status": "advertisement {advertisement.title} successfully updated"                    
                 }
             )
 
@@ -105,12 +104,10 @@ class Advertisement(web.View):
 
 # создание 'контекста' работы приложений
 async def orm_context(app: web.Application):
-    print("START")
     async with engine.begin() as conn:  # подключение к БД
         await conn.run_sync(Base.metadata.create_all)  # миграции
         await conn.commit()
-    yield
-    print("FINISH")
+    yield  
     await engine.dispose()  # разрыв соединения с БД
 
 
